@@ -22,7 +22,7 @@ this will give you a good sense of how and why things are done a certain way.
 
 ## where to begin
 
-- you can explore open issues here: [https://github.com/gauripod/dumpspot/issues](https://github.com/gauripod/dumpspot/issues)
+- you can explore open issues here: [https://github.com/gauripod/dumpspot/issues](https://github.com/gauripod/dumpspot.info/issues)
 - pick something small and clear to start
 - if something feels unclear, opening an issue or discussion first is always welcome
 
