@@ -23,6 +23,37 @@ function getDb() {
   return db;
 }
 
+async function registerBoundaryCorrection() {
+  const isLocal =
+    location.hostname === "localhost" || location.hostname === "127.0.0.1";
+  const hasSwSupport = "serviceWorker" in navigator;
+  const api = window.IndiaBoundaryCorrector;
+
+  if (!hasSwSupport || !api?.registerCorrectionServiceWorker) return null;
+
+  try {
+    const sw = await api.registerCorrectionServiceWorker("./sw.js", {
+      controllerTimeout: 5000,
+      forceReinstall: isLocal,
+      pmtilesUrl:
+        "https://cdn.jsdelivr.net/npm/@india-boundary-corrector/service-worker@0.2.1/dist/india_boundary_corrections.pmtiles",
+    });
+    window.boundaryCorrectionSw = sw;
+    return sw;
+  } catch (e) {
+    console.warn("[DumpSpot] India boundary correction setup failed:", e);
+    return null;
+  }
+}
+
+async function initApp() {
+  sizeViews();
+  await registerBoundaryCorrection();
+  initMap();
+  initUpload();
+  maybeShowWelcome();
+}
+
 function maybeShowWelcome() {
   if (sessionStorage.getItem("ds_welcomed")) return;
   sessionStorage.setItem("ds_welcomed", "1");
@@ -925,10 +956,7 @@ function resetForm() {
 }
 
 window.addEventListener("load", () => {
-  sizeViews();
-  initMap();
-  initUpload();
-  maybeShowWelcome();
+  initApp();
 });
 window.addEventListener("resize", sizeViews);
 const DP_CHARS = "FCJ9RELEEBEMG8D7VT6KH5LNQP4SZ3Y2X1W0";
