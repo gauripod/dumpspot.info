@@ -369,9 +369,7 @@ function renderWall(data) {
   const g = groupByTime(data);
   let html = "";
   if (g.today.length) html += renderGroup("Today", g.today, "today");
-  else if (g.yesterday.length)
-    html += renderGroup("Yesterday", g.yesterday, "yesterday");
-  if (g.today.length && g.yesterday.length)
+  if (g.yesterday.length)
     html += renderGroup("Yesterday", g.yesterday, "yesterday");
   if (g.thisWeek.length)
     html += renderGroup("This week", g.thisWeek, "this-week");
