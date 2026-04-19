@@ -155,31 +155,86 @@ let reports = [],
   map,
   mLayer,
   detMap = null,
-  curView = "map",
-  prevPage = "pg-feed";
+  curView = "map";
 const PAGES = ["pg-feed", "pg-detail", "pg-report"];
 
-function goPage(id, from) {
+// Routing 
+// Maps each page ID to its canonical URL path.
+const PAGE_PATHS = {
+  "pg-feed":   "/",
+  "pg-report": "/report",
+  "pg-detail": "/",   // detail overlays the feed URL
+};
+
+// Resolve a URL pathname to { page, view }.
+function routeFromPath(pathname) {
+  if (pathname === "/report")  return { page: "pg-report", view: null };
+  if (pathname === "/reports") return { page: "pg-feed",   view: "list" };
+  return                               { page: "pg-feed",   view: "map" };
+}
+
+// Internal: apply a page switch in the DOM only, no history side-effects.
+function _showPage(id) {
   PAGES.forEach((p) => document.getElementById(p).classList.remove("on"));
   document.querySelectorAll(".ntab").forEach((t) => t.classList.remove("on"));
   document.getElementById(id).classList.add("on");
-  if (id === "pg-feed")
-    document.getElementById("ntab-feed").classList.add("on");
-  if (id === "pg-report")
-    document.getElementById("ntab-report").classList.add("on");
-  if (from) prevPage = from;
+  if (id === "pg-feed")   document.getElementById("ntab-feed").classList.add("on");
+  if (id === "pg-report") document.getElementById("ntab-report").classList.add("on");
   if (id === "pg-feed" && map) setTimeout(() => map.invalidateSize(), 80);
   window.scrollTo(0, 0);
 }
-function goBack() {
-  goPage(prevPage || "pg-feed");
+
+// Flag set while restoring state from popstate so setView never double-pushes.
+let _restoringHistory = false;
+
+// Public navigation — updates the URL and switches the visible page.
+function goPage(id, from) {
+  if (id === "pg-detail") { _showPage(id); return; } // openDetail owns detail history
+  const path = PAGE_PATHS[id] || "/";
+  history.pushState({ page: id }, "", path);
+  _showPage(id);
 }
+
+// Back button (in-page UI) delegates to the browser's own history.
+function goBack() {
+  history.back();
+}
+
+// Open a report detail overlay and record it in history so back-button works.
 function openDetail(id) {
   const r = reports.find((x) => x.id === id);
   if (!r) return;
-  prevPage = "pg-feed";
   renderDetail(r);
-  goPage("pg-detail");
+  history.pushState({ page: "pg-detail", reportId: id }, "", "/");
+  _showPage("pg-detail");
+}
+
+// Restore app state when the user presses browser back/forward.
+window.addEventListener("popstate", (e) => {
+  _restoringHistory = true;
+  const st = e.state || {};
+  if (st.page === "pg-detail" && st.reportId) {
+    const r = reports.find((x) => x.id === st.reportId);
+    if (r) renderDetail(r);
+    _showPage("pg-detail");
+  } else {
+    const { page, view } = st.page
+      ? { page: st.page, view: st.view || null }
+      : routeFromPath(location.pathname);
+    _showPage(page || "pg-feed");
+    if (view) setView(view);
+  }
+  _restoringHistory = false;
+});
+
+// Read the current URL on first load and show the matching page.
+function route() {
+  const { page, view } = routeFromPath(location.pathname);
+  history.replaceState({ page, view }, "", location.pathname);
+  _showPage(page);
+  _restoringHistory = true;   // setView during init must not push extra history
+  setView(view || "map");
+  _restoringHistory = false;
 }
 
 async function fetchReports() {
@@ -450,6 +505,14 @@ function setView(v) {
   document.getElementById("btn-map").classList.toggle("on", v === "map");
   document.getElementById("btn-list").classList.toggle("on", v === "list");
   if (v === "map" && map) setTimeout(() => map.invalidateSize(), 60);
+  // Keep the URL in sync with the map/list toggle.
+  // Skip during history restoration or when the URL is already correct.
+  if (!_restoringHistory) {
+    const target = v === "list" ? "/reports" : "/";
+    if (location.pathname !== target) {
+      history.pushState({ page: "pg-feed", view: v }, "", target);
+    }
+  }
 }
 
 function sizeViews() {
@@ -924,6 +987,12 @@ function resetForm() {
     ua.style.pointerEvents = "";
   }
 }
+
+// Route based on URL as soon as the DOM is ready — before CDN scripts finish
+// loading. This prevents the default pg-feed from showing on /report or /reports.
+document.addEventListener("DOMContentLoaded", () => {
+  route();
+});
 
 window.addEventListener("load", () => {
   sizeViews();
