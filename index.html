@@ -140,7 +140,6 @@
             </div>
             <p>Tap or drag photos here</p>
             <small>1 to 6 · JPG PNG WEBP</small>
-            <small>EXIF metadata removed before upload to protect against location tracing</small>
           </div>
           <div id="pgrid" class="pgrid" style="display:none;"></div>
           <div id="upcount" class="upcount"></div>
@@ -169,8 +168,6 @@
 <script>window._db = supabase;</script>
 <script src="config.js"></script>
 <script>
-  window.DB_URL           = (typeof DB_URL           !== "undefined") ? DB_URL           : "";
-  window.DB_KEY           = (typeof DB_KEY           !== "undefined") ? DB_KEY           : "";
   window.LOCK_INSPECT_ENV = (typeof LOCK_INSPECT_ENV !== "undefined") ? LOCK_INSPECT_ENV : false;
 </script>
 <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>

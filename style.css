@@ -248,6 +248,22 @@ nav {
   border-color: var(--b2) !important;
 }
 
+.leaflet-control-attribution {
+  background: rgba(7, 12, 7, 0.82) !important;
+  color: #9bb89b !important;
+  font-family: var(--fm);
+  font-size: 9px !important;
+  line-height: 1.35;
+  letter-spacing: 0.2px;
+  padding: 3px 7px !important;
+  border-radius: 4px 0 0 0;
+  max-width: calc(100% - 8px);
+}
+
+.leaflet-control-attribution a {
+  color: #d7ead7 !important;
+}
+
 .leaflet-popup-content-wrapper {
   background: var(--s1) !important;
   border: 1px solid var(--b2) !important;
@@ -1306,11 +1322,9 @@ textarea {
 }
 
 .uparea small {
-  display: block;
   font-size: .68rem;
   color: var(--mu);
   opacity: .6;
-  margin-top: .18rem;
 }
 
 .pgrid {

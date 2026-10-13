@@ -1,14 +1,17 @@
 const fs = require("fs");
-const url = process.env.DB_URL || "";
-const key = process.env.DB_KEY || "";
-const lock = process.env.LOCK_INSPECT_ENV || "false";
+const missing = ["DB_URL", "DB_KEY", "CARTER_KEYS"].filter(
+  (name) => !process.env[name],
+);
+if (missing.length) {
+  console.error("Missing environment variables:", missing.join(", "));
+  process.exit(1);
+}
+const lock = process.env.LOCK_INSPECT_ENV === "true";
 fs.writeFileSync(
   "config.js",
-  `const DB_URL = "${url}";\nconst DB_KEY = "${key}";\nconst LOCK_INSPECT_ENV = ${lock};\n`,
+  `const LOCK_INSPECT_ENV = ${lock ? "true" : "false"};\n`,
 );
 console.log(
-  "config.js generated, URL:",
-  url ? "SET" : "MISSING",
-  "| KEY:",
-  key ? "SET" : "MISSING",
+  "config.js generated without credentials. LOCK_INSPECT_ENV:",
+  lock ? "true" : "false",
 );

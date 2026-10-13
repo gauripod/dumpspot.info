@@ -15,11 +15,9 @@ if (LOCK_INSPECT) {
 
 let db = null;
 function getDb() {
-  if (!db)
-    db = window._db.createClient(
-      window.DB_URL || DB_URL,
-      window.DB_KEY || DB_KEY,
-    );
+  if (!db) {
+    db = window._db.createClient(`${location.origin}/sb`, "public");
+  }
   return db;
 }
 
@@ -197,7 +195,12 @@ async function fetchReports() {
         .map((p) => p.url),
     }));
   } catch (e) {
-    toast("Could not load reports. Check your connection.", true);
+    toast(
+      e && e.message === "Database is not configured"
+        ? "Reports are not configured."
+        : "Could not load reports. Check your connection.",
+      true,
+    );
     reports = [];
   }
   setFeedLoading(false);
@@ -210,19 +213,20 @@ function setFeedLoading(on) {
   if (el) el.style.display = on ? "flex" : "none";
 }
 
+function addBasemap(leafletMap, dark) {
+  const style = dark ? "dark_all" : "voyager";
+  return L.tileLayer("/tiles/" + style + "/{z}/{x}/{y}.png", {
+    attribution: "© OpenStreetMap © CARTO",
+    maxZoom: 20,
+  }).addTo(leafletMap);
+}
+
 function initMap() {
   map = L.map("map", { zoomControl: true, scrollWheelZoom: true }).setView(
     [20.5937, 78.9629],
     3,
   );
-  L.tileLayer(
-    "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
-    {
-      attribution: "© OpenStreetMap © CARTO",
-      subdomains: "abcd",
-      maxZoom: 19,
-    },
-  ).addTo(map);
+  addBasemap(map, false);
   mLayer = L.layerGroup().addTo(map);
   buildCatFilter();
   fetchReports();
@@ -263,8 +267,8 @@ function makePinIcon(cats) {
     className: "",
     html: `<div class="dpin">${pinIcon(cats)}</div>`,
     iconSize: [28, 28],
-    iconAnchor: [14, 28],
-    popupAnchor: [0, -30],
+    iconAnchor: [14, 14],
+    popupAnchor: [0, -18],
   });
 }
 
@@ -520,13 +524,10 @@ function renderDetail(r) {
       dragging: false,
       touchZoom: false,
       doubleClickZoom: false,
-    }).setView([r.lat, r.lng], 14);
-    L.tileLayer(
-      "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-      { subdomains: "abcd", maxZoom: 19 },
-    ).addTo(detMap);
+    }).setView([r.lat, r.lng], 17);
+    addBasemap(detMap, true);
     L.circle([r.lat, r.lng], {
-      radius: 400,
+      radius: 24,
       color: "#ff2d78",
       fillColor: "#ff2d78",
       fillOpacity: 0.08,
@@ -629,7 +630,7 @@ function toggleCat(el, key) {
   }
 }
 
-function stripExifAndCompressImage(file) {
+function compressImage(file) {
   return new Promise((resolve) => {
     const img = new Image();
     const url = URL.createObjectURL(file);
@@ -642,9 +643,6 @@ function stripExifAndCompressImage(file) {
       const canvas = document.createElement("canvas");
       canvas.width = w;
       canvas.height = h;
-
-      // Redrawing onto canvas creates a fresh image binary so original EXIF
-      // metadata like GPS/camera tags is not carried into the uploaded file.
       canvas.getContext("2d").drawImage(img, 0, 0, w, h);
       canvas.toBlob(
         (blob) =>
@@ -688,7 +686,7 @@ async function addFiles(fs) {
     .filter((f) => f.type.startsWith("image/"))
     .slice(0, 6 - upFiles.length);
   for (const f of eligible) {
-    const compressed = await stripExifAndCompressImage(f);
+    const compressed = await compressImage(f);
     if (upFiles.length < 6) upFiles.push(compressed);
   }
   renderPreviews();
@@ -934,32 +932,38 @@ window.addEventListener("load", () => {
   maybeShowWelcome();
 });
 window.addEventListener("resize", sizeViews);
-const DP_CHARS = "FCJ9RELEEBEMG8D7VT6KH5LNQP4SZ3Y2X1W0";
+const DIGIPIN_GRID = [
+  ["F", "C", "9", "8"],
+  ["J", "3", "2", "7"],
+  ["K", "4", "5", "6"],
+  ["L", "M", "P", "T"],
+];
 
 function encodeDigipin(lat, lng) {
   if (lat < 2.5 || lat > 38.5 || lng < 63.5 || lng > 99.5) return null;
-  const ROWS = 4,
-    COLS = 4;
   let minLat = 2.5,
     maxLat = 38.5,
     minLng = 63.5,
     maxLng = 99.5;
   let pin = "";
-  for (let level = 0; level < 8; level++) {
-    const dLat = (maxLat - minLat) / ROWS;
-    const dLng = (maxLng - minLng) / COLS;
-    const row = Math.min(ROWS - 1, Math.floor((lat - minLat) / dLat));
-    const col = Math.min(COLS - 1, Math.floor((lng - minLng) / dLng));
-    const gridRow = ROWS - 1 - row;
-    const charIdx = gridRow * COLS + col;
-    pin += DP_CHARS[charIdx];
-    minLat = minLat + row * dLat;
-    maxLat = minLat + dLat;
-    minLng = minLng + col * dLng;
-    maxLng = minLng + dLng;
-    if (level === 2 || level === 5) pin += "-";
+  for (let level = 0; level < 10; level++) {
+    const latDiv = (maxLat - minLat) / 4;
+    const lngDiv = (maxLng - minLng) / 4;
+    let row = 3 - Math.floor((lat - minLat) / latDiv);
+    let col = Math.floor((lng - minLng) / lngDiv);
+    row = Math.max(0, Math.min(row, 3));
+    col = Math.max(0, Math.min(col, 3));
+    pin += DIGIPIN_GRID[row][col];
+    maxLat = minLat + latDiv * (4 - row);
+    minLat = minLat + latDiv * (3 - row);
+    minLng = minLng + lngDiv * col;
+    maxLng = minLng + lngDiv;
   }
   return pin;
+}
+
+function formatDigipin(pin) {
+  return pin.slice(0, 3) + " " + pin.slice(3, 7) + " " + pin.slice(7);
 }
 
 function encodePlusCode(lat, lng) {
@@ -1012,20 +1016,15 @@ function initPinMap(lat, lng) {
   setTimeout(() => {
     pinMap = L.map("pin-confirm-map", {
       zoomControl: true,
-      scrollWheelZoom: false,
-    }).setView([lat, lng], 16);
-    L.tileLayer(
-      "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
-      {
-        subdomains: "abcd",
-        maxZoom: 19,
-      },
-    ).addTo(pinMap);
+      scrollWheelZoom: true,
+      maxZoom: 20,
+    }).setView([lat, lng], 18);
+    addBasemap(pinMap, false);
     const icon = L.divIcon({
       className: "",
       html: `<div class="dpin" style="cursor:grab;">${ICONS.drop}</div>`,
       iconSize: [28, 28],
-      iconAnchor: [14, 28],
+      iconAnchor: [14, 14],
     });
     pinMarker = L.marker([lat, lng], { icon, draggable: true }).addTo(pinMap);
     pinMarker.on("dragend", () => {
@@ -1050,7 +1049,8 @@ function updatePinInfo(lat, lng) {
   const dpEl = document.getElementById("pin-digipin");
   if (dpEl) {
     const parts = [];
-    if (codes.digipin) parts.push("DigiPin: " + codes.digipin);
+    if (codes.digipin)
+      parts.push("DigiPin: " + formatDigipin(codes.digipin));
     if (codes.pluscode) parts.push("Plus Code: " + codes.pluscode);
     dpEl.textContent = parts.join("  ·  ");
   }

@@ -80,9 +80,10 @@ No framework. No build step. Three files that run directly in a browser.
 - `index.html` — all markup, page structure, script imports
 - `style.css` — all styles, design tokens, layout, components
 - `app.js` — all logic: map, list, form, upload, submit, spam checks, location encoding
-- `config.js` — credentials only, gitignored, never pushed
-- `build.js` — Node script run at deploy time, generates `config.js` from env vars
-- `netlify.toml` — one line: `node build.js`
+- `config.js` — inspect lock only, gitignored, never pushed
+- `build.js` — checks the environment exists, then writes the lock flag
+- `netlify.toml` — build command and the tile/database proxy
+- `netlify/edge-functions/proxy.js` — reads the keys on the server and never sends them to the browser
 - `favicon.svg` — fairy with a trash bag
 
 Everything loads from CDN. No npm, no bundler, no local install required.
@@ -97,7 +98,7 @@ python3 -m http.server 8080
 npx serve .
 ```
 
-Open `http://localhost:8080`. Make sure `config.js` has your real credentials.
+Open `http://localhost:8080` with `netlify dev` so the tile and database proxy can read `DB_URL`, `DB_KEY`, and `CARTER_KEYS`. Those values are never written into the site.
 
 ---
 
@@ -107,9 +108,10 @@ Open `http://localhost:8080`. Make sure `config.js` has your real credentials.
 2. Connect repo to Netlify
 3. Set environment variables in Netlify → Site settings → Environment variables:
    - `DB_URL` — your database project URL
-   - `DB_KEY` — your publishable API key
+   - `DB_KEY` — your publishable API key, not a secret key
+   - `CARTER_KEYS` — your CARTO basemap key
    - `LOCK_INSPECT_ENV` — `true` (disables devtools on production)
-4. Deploy — Netlify runs `node build.js`, generates `config.js`, serves the site
+4. Deploy — Netlify runs `node build.js`. The build only checks that the variables exist. An edge proxy reads `CARTER_KEYS` and `DB_KEY` when a request comes in, so neither value is published in the site.
 
 ---
 

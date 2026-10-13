@@ -28,9 +28,10 @@
 index.html       Page shell — nav, all page divs, script/link imports
 style.css        All styles — tokens, nav, feed, list, form, detail, components
 app.js           All logic — see breakdown below
-config.js        DB_URL, DB_KEY, LOCK_INSPECT_ENV — gitignored
-build.js         Netlify build script — writes config.js from env vars
-netlify.toml     build command: node build.js
+config.js        LOCK_INSPECT_ENV only — generated, gitignored. Keys stay in the host environment.
+build.js         Checks the environment, writes only the lock flag
+netlify.toml     Build command and proxy routes
+netlify/edge-functions/proxy.js  Server proxy for map tiles and the database
 favicon.svg      SVG icon
 .gitignore       Excludes config.js
 ```
@@ -42,7 +43,7 @@ favicon.svg      SVG icon
 | Section                   | What it does                                                                  |
 | ------------------------- | ----------------------------------------------------------------------------- |
 | Inspect lock              | Disables F12/Ctrl+U/right-click if `LOCK_INSPECT_ENV = true`                  |
-| `getDb()`                 | Lazy DB client init — reads `window.DB_URL` + `window.DB_KEY` on first call   |
+| `getDb()`                 | Lazy DB client — talks to the same-origin proxy, which holds the key          |
 | `maybeShowWelcome()`      | Session-scoped welcome toast, one per browser session                         |
 | `toast()`                 | Wrapper for Toastify — green (info) or red (error)                            |
 | `ICONS`                   | SVG strings for all 8 garbage category icons + photo placeholder              |
@@ -280,7 +281,7 @@ Script load order (bottom of body):
 
 ```
 leaflet.js → supabase-js → toastify → window._db alias → config.js →
-window.DB_URL/DB_KEY assignment → open-location-code → face-api.js → app.js
+open-location-code → face-api.js → app.js
 ```
 
 ---
