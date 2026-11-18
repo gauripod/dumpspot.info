@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DumpSpot</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Playfair+Display:ital,wght@1,700;1,900&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+<link rel="stylesheet" href="/v1/style.css">
+<link rel="icon" type="image/svg+xml" href="/image.png">
+</head>
+<body>
+
+</head>
+<body>
+
+<nav>
+  <div class="nlogo" onclick="goPage('pg-feed');setView('map')">
+    <div class="nlogo-t">DumpSpot</div>
+    <div class="nlogo-s">post your dump here</div>
+  </div>
+  <div class="ntabs">
+    <button class="ntab on" id="ntab-feed"   onclick="goPage('pg-feed');setView('map')">Feed</button>
+    <button class="ntab"    id="ntab-report" onclick="goPage('pg-report')">+ Report</button>
+  </div>
+</nav>
+
+<div id="pg-feed" class="pg on">
+  <div class="toolbar">
+    <span class="fl">Filter</span>
+    <select class="fsel" id="fs-state" onchange="applyFilters()"><option value="">All states</option></select>
+    <select class="fsel" id="fs-area"  onchange="applyFilters()"><option value="">All areas</option></select>
+    <select class="fsel" id="fs-cat"   onchange="applyFilters()"><option value="">All categories</option></select>
+    <div class="vtog">
+      <button class="vbtn on" id="btn-map"  onclick="setView('map')">Map</button>
+      <button class="vbtn"    id="btn-list" onclick="setView('list')">List</button>
+    </div>
+    <div class="cnt"><b id="cnt-n">0</b><span>spots</span></div>
+  </div>
+  <div id="feed-loading" style="display:none;flex:1;align-items:center;justify-content:center;font-family:var(--fm);font-size:.65rem;color:var(--mu);letter-spacing:1px;text-transform:uppercase;">Loading reports…</div>
+  <div id="map-wrap"><div id="map"></div></div>
+  <div id="list-wrap">
+    <div class="clist" id="clist"></div>
+  </div>
+</div>
+
+<div id="pg-detail" class="pg">
+  <div class="rp-outer det-outer">
+    <button class="back-btn" onclick="goBack()">
+      <svg viewBox="0 0 12 12" stroke-width="1.5"><path d="M8 2L4 6l4 4"/></svg>
+      Back to feed
+    </button>
+    <div id="det-content"></div>
+    <div id="det-mini-map" style="display:none;margin-top:1.2rem;"></div>
+  </div>
+</div>
+
+<div id="pg-report" class="pg">
+  <div class="rp-outer">
+    <div id="form-screen">
+      <div class="rp-head">
+        <p class="rp-ctx">See garbage piling up on your street? Drop a pin.<br>No login, no hassle — a name, a place, a photo.</p>
+      </div>
+
+      <div class="form-grid">
+        
+        <div class="form-col">
+          <label class="fl-label">Your name <span class="req">*</span></label>
+          <input type="text" id="rname" placeholder="What to call you" maxlength="60">
+
+          <label class="fl-label">State <span class="req">*</span> &amp; Area <span class="req">*</span></label>
+          <div class="r2">
+            <input type="text" id="rstate" placeholder="State" maxlength="50" onblur="validateLocationField(this.value,'state')">
+            <input type="text" id="rarea"  placeholder="District / Area" maxlength="60" onblur="validateLocationField(this.value,'area')">
+          </div>
+
+          <label class="fl-label">Specific location <span class="req">*</span></label>
+          <div class="loc-search-wrap">
+            <input type="text" id="rspec" placeholder="Search or type your location" maxlength="200" autocomplete="off" oninput="onLocInput(this.value)">
+            <div class="loc-results" id="loc-results"></div>
+          </div>
+          <button class="loc-maps-btn" onclick="openGoogleMaps()">
+            <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+            Open in Google Maps instead
+          </button>
+          <div id="pin-confirm-wrap" style="display:none;margin-top:.75rem;">
+            <div class="fl-label" style="margin-bottom:.35rem;color:#6a9a8a;">Drag the pin to exact location <span style="color:var(--fa);font-size:.5rem;">· tap map to move</span></div>
+            <div id="pin-confirm-map" style="width:100%;height:200px;border-radius:6px;overflow:hidden;border:1px solid var(--b2);"></div>
+            <div id="pin-digipin" style="font-family:var(--fm);font-size:.55rem;color:var(--mu);margin-top:.35rem;letter-spacing:.5px;"></div>
+            <div id="pin-revgeo" style="font-family:var(--fm);font-size:.6rem;color:#6a9a8a;margin-top:.3rem;min-height:1rem;"></div>
+          </div>
+
+        </div>
+
+        
+        <div class="form-col">
+          <label class="fl-label fl-site">Type of site <span class="opt">optional</span></label>
+          <div class="trow">
+            <div class="tag" data-g="type">Road</div>
+            <div class="tag" data-g="type">Footpath</div>
+            <div class="tag" data-g="type">Nala / Drain</div>
+            <div class="tag" data-g="type">Open plot</div>
+            <div class="tag" data-g="type">Park</div>
+            <div class="tag" data-g="type">Market</div>
+            <div class="tag" data-g="type">Near school</div>
+            <div class="tag" data-g="type">Near hospital</div>
+            <div class="tag" data-g="type">Road encroachment</div>
+          </div>
+
+          <label class="fl-label fl-sev" style="margin-top:1.3rem;">Severity <span class="opt">optional</span></label>
+          <div class="trow">
+            <div class="tag" data-g="sev">Minor</div>
+            <div class="tag" data-g="sev">Moderate</div>
+            <div class="tag" data-g="sev">Severe</div>
+            <div class="tag" data-g="sev">Blocking road</div>
+          </div>
+        </div>
+
+        
+        <div class="form-col">
+          <label class="fl-label fl-cat">Garbage category <span class="opt">optional</span></label>
+          <div class="cgrid" id="cgrid"></div>
+        </div>
+
+        
+        <div class="form-notes-row">
+          <label class="fl-label">Notes <span class="opt">optional</span></label>
+          <textarea id="rnotes" placeholder="Smell, duration, any hazard to public…" style="width:100%;height:80px;resize:none;"></textarea>
+        </div>
+
+        
+        <div class="form-full">
+          <div class="rp-divider"></div>
+          <label class="fl-label">Photos <span class="req">*</span></label>
+          <div class="uparea" id="uparea">
+            <input type="file" id="photo-input" accept="image/*" multiple>
+            <div class="uparea-ico">
+              <svg viewBox="0 0 24 24" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            </div>
+            <p>Tap or drag photos here</p>
+            <small>1 to 6 · JPG PNG WEBP</small>
+          </div>
+          <div id="pgrid" class="pgrid" style="display:none;"></div>
+          <div id="upcount" class="upcount"></div>
+          <div class="sub-row">
+            <button class="sub-btn" onclick="submitReport()">Submit Report</button>
+            <p class="anon">No account needed<br>anonymous beyond your name</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="succ" id="succ">
+      <svg style="width:44px;height:44px;margin-bottom:1rem;opacity:.42;" viewBox="0 0 24 24" fill="none" stroke="var(--pk)" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg>
+      <h2>Pinned.</h2>
+      <p>Your report is live on the map.<br>Share DumpSpot — more eyes, more pressure.</p>
+      <div class="succ-id" id="succ-id"></div>
+      <button class="ragain" onclick="resetForm()">Report another spot</button>
+    </div>
+  </div>
+</div>
+
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script>window._db = supabase;</script>
+<script src="/config.js"></script>
+<script>
+  window.LOCK_INSPECT_ENV = (typeof LOCK_INSPECT_ENV !== "undefined") ? LOCK_INSPECT_ENV : false;
+</script>
+<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+<script src="/v1/app.js"></script>
+</body>
+</html>

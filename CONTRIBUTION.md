@@ -1,6 +1,6 @@
 # contributing to dumpspot
 
-dumpSpot is open to contributions that are thoughtful, minimal, and aligned with the product’s intent.
+dumpspot isn't open source, but it's very open to contributions that are thoughtful, minimal, and aligned with what it's for.
 
 it is built to be simple, direct, and useful. every contribution should move it in that direction.
 
@@ -97,12 +97,15 @@ before making ui changes:
 
 ---
 
-## open source direction
+## licence
 
-everything used here is, and will remain, open source.
+dumpspot is not open source. the code is public so you can read it and help make it better.
 
-this project is released under the MIT License © 2026 DumpSpot (Gauri).
-while reuse is allowed, the intent and simplicity of the system should be respected.
+- you can fork it to work on an issue or a pull request back to this repo.
+- please don't run your own copy or reuse the code elsewhere without asking.
+- by opening a pull request, you agree your contribution can be used in dumpspot under its [licence](./LICENSE).
+
+the libraries and data it uses are open source and keep their own licences (see [`BUILD.md`](./BUILD.md)).
 
 ---
 

@@ -1,0 +1,20 @@
+# Supabase pauses free projects after about 7 days without activity. A paused project's
+# address stops resolving and DumpSpot shows "offline". This reads one row every 3 days
+# (read-only) so the project stays awake. Add DB_URL and DB_KEY as repository secrets.
+name: Keep database awake
+on:
+  schedule:
+    - cron: "17 5 */3 * *"
+  workflow_dispatch:
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node scripts/check-db.mjs
+        env:
+          DB_URL: ${{ secrets.DB_URL }}
+          DB_KEY: ${{ secrets.DB_KEY }}

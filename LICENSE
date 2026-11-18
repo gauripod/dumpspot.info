@@ -1,21 +1,32 @@
-MIT License
+DumpSpot
+Copyright (c) 2026 Gauri. All rights reserved.
 
-Copyright (c) 2026 DumpSpot (Gauri)
+This repository is public so people can read the code, learn from it, report
+problems and contribute. It is not open source.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to do so, subject to the
-following conditions:
+You may:
+  - view and read the code;
+  - fork this repository on GitHub to prepare a contribution (an issue or a
+    pull request) back to it.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+You may not, without written permission from Gauri:
+  - copy, modify, publish, distribute, sublicense or sell this code or any
+    part of it outside of contributing back to this repository;
+  - run your own public copy of DumpSpot or use its name, logo or design.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Contributions
+  By opening a pull request you agree that your contribution may be used in
+  DumpSpot under this licence, and you confirm you have the right to give it.
+
+Earlier versions
+  Versions of DumpSpot published before this notice (19 November 2026) were
+  released under the MIT License, and stay under it. Contributions made to
+  those versions keep their MIT notice.
+
+Third-party work
+  DumpSpot uses open-source libraries, fonts, icons and open data under their
+  own licences, listed in BUILD.md. Those licences still apply to that work.
+  In particular, Spot (the dog) is adapted from OpenMoji (openmoji.org) and is
+  shared under CC BY-SA 4.0, as that licence requires.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.

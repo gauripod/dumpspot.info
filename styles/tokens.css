@@ -1,0 +1,107 @@
+/* DumpSpot design tokens, v8 "Cyanotype". The only place values are defined.
+   A naturalist's field journal laid over a city survey. See DESIGN.md.
+   Older role names (soot, slab, plan...) are kept so components don't change when the palette does. */
+:root {
+  /* Colour: "Fresh garden". Clean white ground, clear living colour. */
+  --ink: #10231a;        /* text, the few structure lines */
+  --paper: #f5f7f2;      /* quiet panels, the map's frame, hover rows */
+  --sheet: #ffffff;      /* page ground, inputs */
+  --stone: #6b7a70;      /* secondary text */
+  --cyan: #2448d8;       /* BRAND, cyanotype blue: links, selection, focus, the brand mark, specimen prints */
+  --cyan-dark: #1a35a8;
+  --cyan-light: #e8edff;
+  --moss: #1fa34a;       /* growth only: trees, points, levels */
+  --moss-dark: #15803a;
+  --moss-light: #e3f5e6; /* brand tint for selected rows and chips */
+  --clay: #2448d8;       /* problems now share the brand's blue scale; no orange anywhere */
+  --danger: #e5484d;     /* errors only */       /* the problem: complaints, hazards, the kicker */
+  --clay-light: #ffe9e4;
+  --sky: #3fa9f5;        /* water, rain, air */
+  --sky-light: #e3f3fe;
+  --pollen: #ffd23f;     /* highlighter */
+  --pink: #ff2e88;       /* Report a spot, and nothing else */
+  --pink-deep: #d4106a;
+  --pink-light: #ff86bf;
+
+  /* Roles */
+  --soot: var(--ink);
+  --concrete: var(--paper);
+  --slab: var(--sheet);
+  --graphite: var(--stone);
+  --plan: var(--cyan);
+  --plan-dark: var(--cyan-dark);
+  --rust: var(--clay);
+  --problem: var(--clay);
+  --lichen: var(--pollen);
+  --text: var(--ink);
+  --text-2: #3d4d43;
+  --text-3: var(--stone);
+  --line: #e6e9e2;
+  --surface: var(--sheet);
+  --ground: #eef1f7;     /* blueprint paper: the page. White things sit on it. */
+  --mark: #ffe58a;
+  --action: var(--cyan);
+  --action-hover: var(--cyan-dark);
+  --sev-0: #e3e8f5;
+  --sev-1: #b9c6f7;
+  --sev-2: #7d93f0;
+  --sev-3: #2448d8;
+  --sev-4: #101c63;
+
+  /* Type: three faces, one job each */
+  --font-display: "Gloock", Georgia, serif;                       /* botanical-print serif: headlines, titles, wordmark */
+  --font: "Hanken Grotesk", system-ui, sans-serif;                /* calm grotesk: everything you read */
+  --font-mono: "B612 Mono", ui-monospace, monospace;              /* field-instrument mono: labels, numbers */
+
+  /* Type: the five roles. size / line-height */
+  --display: 52px;
+  --display-lh: 56px;
+  --title: 28px;
+  --title-lh: 34px;
+  --body: 15px;
+  --body-lh: 24px;
+  --small: 13px;
+  --small-lh: 20px;
+  --label: 11px;
+  --label-lh: 16px;
+  --label-track: 0.06em;
+
+  /* Space */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+  --sp-8: 64px;
+
+  /* Layout */
+  --page: 1200px;
+  --measure: 680px;
+  --gutter: 24px;
+  --bar: 52px;
+  --control: 36px;
+  --control-sm: 30px;
+
+  /* Corners: soft, never pill except chips */
+  --radius: 10px;
+  --radius-sm: 6px;
+
+  /* Lines */
+  --structure: 1px solid var(--line);
+  --strong: 1px solid var(--ink);
+  --hairline: 1px solid var(--line);
+
+  /* Motion: slow and calm, like turning a page */
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --fast: 140ms;
+  --med: 260ms;
+}
+
+@media (max-width: 720px) {
+  :root { --display: 36px; --display-lh: 40px; --title: 24px; --title-lh: 30px; --gutter: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root { --fast: 1ms; --med: 1ms; }
+}

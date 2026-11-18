@@ -9,3 +9,20 @@
 [[edge_functions]]
   function = "proxy"
   path = "/sb/*"
+
+# Clean paths for the single-page app (the hash router takes over in js/main.js)
+[[redirects]]
+  from = "/study"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/garden"
+  to = "/index.html"
+  status = 200
+
+# The first version of DumpSpot, kept as it was
+[[redirects]]
+  from = "/v1"
+  to = "/v1/"
+  status = 301
